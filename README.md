@@ -79,8 +79,7 @@ revisions for exact reproducibility; the Hugging Face model IDs are `bert-base-c
 `answerdotai/ModernBERT-base`.
 
 ## Citation
-If you use this code or the RE-120 test set, please cite the paper and this repository
-(archived on Zenodo — DOI to be added on release).
+If you use this code or the RE-120 test set, please cite the paper and this repository.
 
 ## License
 Code: MIT (see `LICENSE`). Data (`requirements-test-120-fixed.json`): CC BY 4.0.
