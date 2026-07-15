@@ -1,0 +1,6 @@
+# Install a CUDA torch build for GPU (see https://pytorch.org). Any recent torch works.
+torch>=2.2
+transformers>=4.40
+datasets>=2.19
+numpy>=1.24
+scipy>=1.10
