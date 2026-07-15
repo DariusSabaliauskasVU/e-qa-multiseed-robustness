@@ -7,13 +7,13 @@ plt.rcParams.update({'font.family':'DejaVu Serif','font.size':9,'axes.linewidth'
 SEEDS=[13,42,73,101,123,202,333,777,1337,2024]
 COLS={'EM':4,'F1':5,'ROUGE-L':6}
 data={}
-for r in csv.reader(open('results_clean.csv')):
+for r in csv.reader(open('repro/results_clean.csv')):
     if r[0]=='config': continue
     data.setdefault(r[0],{})[int(r[1])]={'EM':float(r[4]),'F1':float(r[5]),'ROUGE-L':float(r[6])}
 
 LABEL={'neobert':'NeoBERT','modernbert':'ModernBERT','spanbert':'SpanBERT','bert':'BERT',
   'distilbert':'DistilBERT','partial_ft':'BERT Partial FT','lstm_l3':'BERT+LSTM 3L\n(frozen)',
-  'lstm_l1':'BERT+LSTM 1L\n(frozen)','lstm_l2':'BERT+LSTM 2L\n(frozen)','linear':'BERT+Linear\n(frozen)'}
+  'lstm_l1':'BERT+LSTM 1L\n(frozen)','lstm_l2':'BERT+LSTM 2L\n(frozen)','linear':'BERT+FF\n(frozen)'}
 
 def series(metric):
     out=[]

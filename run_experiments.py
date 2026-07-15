@@ -3,7 +3,7 @@
 Unified, methodology-corrected training/evaluation pipeline for
 "Assessing Answer Span Detection of BERT-Based Architectures for RE QA Tasks".
 
-One script runs all 9 configurations under IDENTICAL conditions
+One script runs all 10 configurations under IDENTICAL conditions
 (same tokenizer settings, MAX_LEN, sliding window, train/val split, span
 decoding, and metrics), varying ONLY the model/adaptation and the random
 seed. This is the clean ablation the reviewers asked for.
@@ -30,7 +30,7 @@ def _torch():
     import torch; return torch
 
 # =========================================================
-# Config registry: the 9 configurations
+# Config registry: the 10 configurations
 # =========================================================
 CONFIGS = {
     # full fine-tuning encoders
@@ -143,9 +143,25 @@ def grouped_split(groups: List, val_fraction=VAL_FRACTION, seed=SPLIT_SEED):
     return train_idx, val_idx
 
 def set_all_seeds(seed: int):
+    """Seed every relevant RNG for reproducibility (Python hash, random, NumPy, torch, CUDA),
+    and request deterministic cuDNN kernels."""
+    os.environ["PYTHONHASHSEED"] = str(seed)
     torch = _torch()
     random.seed(seed); import numpy as np; np.random.seed(seed)
     torch.manual_seed(seed); torch.cuda.manual_seed_all(seed)
+    try:
+        torch.backends.cudnn.deterministic = True
+        torch.backends.cudnn.benchmark = False
+        torch.use_deterministic_algorithms(True, warn_only=True)
+    except Exception:
+        pass
+
+def seed_worker(worker_id):
+    """DataLoader worker seeding (pass as worker_init_fn to any DataLoader)."""
+    import numpy as np, random as _r
+    torch = _torch()
+    ws = (torch.initial_seed() + worker_id) % 2**32
+    np.random.seed(ws); _r.seed(ws)
 
 # =========================================================
 # Sliding-window feature preparation (train: label spans; eval: keep offsets)

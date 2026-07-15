@@ -1,141 +1,78 @@
 #!/usr/bin/env python3
-"""Targeted-pairs Wilcoxon/Holm + TOST equivalence (H4/H5) on the F1 column.
+"""Confirmatory statistics for the RE-QA multi-seed study (F1 column).
 
-Paired tests are valid: same 10 seeds and the same fixed grouped split across all models.
-Reports:
-  - Friedman omnibus
-  - Pre-specified hypothesis pairs (H1, H3) with Wilcoxon + Holm over that small family
-  - Paired Cohen's d and Cliff's delta for each pair
-  - TOST equivalence at +/- 0.05 F1 for H4 (LSTM depth) and H5 (linear vs LSTM)
+Paired tests are valid: the same ten seeds and the same fixed grouped train/val split
+are reused across all models (a common-random-numbers design), so per-seed scores are
+matched across configurations.
+
+Reports, matching the manuscript exactly:
+  * Friedman omnibus.
+  * Confirmatory pairwise Wilcoxon signed-rank tests with Holm correction applied
+    WITHIN each pre-specified hypothesis family (H1, H3) to preserve power.
+  * Mean difference with 95% CI, paired Cohen's d, and matched-pairs rank-biserial
+    correlation (the effect size appropriate for the Wilcoxon signed-rank test).
+  * TOST equivalence for H4 (LSTM depth) and H5 (linear vs LSTM heads) via the 90% CI
+    of the mean difference, with a sensitivity analysis at margins of +/-0.02, +/-0.03, +/-0.05.
 """
-import csv
+import csv, math
 from collections import defaultdict
-import math
 from scipy import stats
 
 CSV = "results_clean.csv"
-METRIC_IDX = 5  # F1 column (0-based): config,seed,epochs,minutes,EM,F1,ROUGE_L
-SEEDS = [13, 42, 73, 101, 123, 202, 333, 777, 1337, 2024]
+METRIC_IDX = 5  # F1
+SEEDS = [13,42,73,101,123,202,333,777,1337,2024]
 
-# ---- load ----
-data = defaultdict(dict)  # config -> seed -> F1
-with open(CSV) as fh:
-    r = csv.reader(fh)
-    next(r)
-    for row in r:
-        if not row or len(row) <= METRIC_IDX:
-            continue
-        cfg, seed = row[0], int(row[1])
-        data[cfg][seed] = float(row[METRIC_IDX])
+data = defaultdict(dict)
+for r in csv.reader(open(CSV)):
+    if not r or r[0]=="config" or len(r)<=METRIC_IDX: continue
+    data[r[0]][int(r[1])] = float(r[METRIC_IDX])
+def vec(c): return [data[c][s] for s in SEEDS]
 
-def vec(cfg):
-    return [data[cfg][s] for s in SEEDS]
-
-configs = list(data.keys())
-
-def mean_sd(v):
-    m = sum(v) / len(v)
-    sd = math.sqrt(sum((x - m) ** 2 for x in v) / (len(v) - 1))
-    return m, sd
-
-# ---- leaderboard ----
-print("=" * 68)
-print("LEADERBOARD (F1, mean +/- sd, n=10 seeds, 30k train)")
-print("=" * 68)
-board = sorted(configs, key=lambda c: mean_sd(vec(c))[0], reverse=True)
-for c in board:
-    m, sd = mean_sd(vec(c))
-    print(f"  {c:12s} {m:.4f} +/- {sd:.4f}")
-
-# ---- Friedman ----
-mat = [vec(c) for c in configs]
-chi2, p = stats.friedmanchisquare(*mat)
-print("\nFriedman omnibus: chi2 = %.2f, p = %.3e" % (chi2, p))
-
-# ---- effect sizes ----
-def paired_cohens_d(a, b):
-    diff = [x - y for x, y in zip(a, b)]
-    m, sd = mean_sd(diff)
-    return m / sd if sd > 0 else float("inf")
-
-def cliffs_delta(a, b):
-    gt = sum(1 for x in a for y in b if x > y)
-    lt = sum(1 for x in a for y in b if x < y)
-    return (gt - lt) / (len(a) * len(b))
-
-def holm(pairs):
-    # pairs: list of (label, pvalue). returns list of (label, p, p_holm, sig)
-    order = sorted(range(len(pairs)), key=lambda i: pairs[i][1])
-    m = len(pairs)
-    out = [None] * len(pairs)
-    running = 0.0
-    for rank, i in enumerate(order):
-        adj = min(1.0, (m - rank) * pairs[i][1])
-        running = max(running, adj)
-        out[i] = running
+def ci(a, b):
+    df=[x-y for x,y in zip(vec(a),vec(b))]; n=len(df); m=sum(df)/n
+    sd=math.sqrt(sum((x-m)**2 for x in df)/(n-1)); se=sd/math.sqrt(n)
+    return m, (m-stats.t.ppf(.975,n-1)*se, m+stats.t.ppf(.975,n-1)*se), \
+              (m-stats.t.ppf(.95,n-1)*se,  m+stats.t.ppf(.95,n-1)*se)   # mean, 95% CI, 90% CI
+def cohend(a, b):
+    df=[x-y for x,y in zip(vec(a),vec(b))]; m=sum(df)/len(df)
+    return m/math.sqrt(sum((x-m)**2 for x in df)/(len(df)-1))
+def rank_biserial(a, b):
+    df=[x-y for x,y in zip(vec(a),vec(b)) if x-y!=0]; n=len(df)
+    rk=stats.rankdata([abs(x) for x in df])
+    Tp=sum(r for r,x in zip(rk,df) if x>0); Tn=sum(r for r,x in zip(rk,df) if x<0)
+    return (Tp-Tn)/(n*(n+1)/2)
+def wilcox(a, b):
+    try: return stats.wilcoxon(vec(a),vec(b))[1]
+    except ValueError: return 1.0
+def holm(ps):
+    order=sorted(range(len(ps)),key=lambda i:ps[i]); m=len(ps); out=[0]*len(ps); run=0
+    for rank,i in enumerate(order): run=max(run,min(1.0,(m-rank)*ps[i])); out[i]=run
     return out
 
-# ---- pre-specified hypothesis pairs ----
-# H1 modern/adapted encoders > BERT baseline; H3 partial FT > frozen heads
-# ModernBERT is treated as a modern encoder (with NeoBERT) in H1.
-_ALL_HYP = [
-    ("H1", "neobert",    "bert"),
-    ("H1", "modernbert", "bert"),
-    ("H1", "spanbert",   "bert"),
-    ("H1", "neobert",    "spanbert"),
-    ("H1", "neobert",    "modernbert"),
-    ("H3", "partial_ft", "lstm_l3"),
-    ("H3", "partial_ft", "linear"),
-]
-# only keep pairs whose both configs are present in the CSV
-HYP = [(t, a, b) for (t, a, b) in _ALL_HYP if a in data and b in data]
-print("\n" + "=" * 68)
-print("PRE-SPECIFIED PAIRS (Wilcoxon signed-rank, Holm over this family of 5)")
-print("=" * 68)
-raw = []
-for tag, a, b in HYP:
-    va, vb = vec(a), vec(b)
-    try:
-        w, pw = stats.wilcoxon(va, vb)
-    except ValueError:
-        w, pw = float("nan"), 1.0
-    raw.append((f"{tag}: {a} vs {b}", pw))
-holm_p = holm(raw)
-for (label, pw), ph, (tag, a, b) in zip(raw, holm_p, HYP):
-    d = paired_cohens_d(vec(a), vec(b))
-    cd = cliffs_delta(vec(a), vec(b))
-    star = "  SIGNIFICANT" if ph < 0.05 else ""
-    print(f"  {label:26s} p={pw:.4f}  p_holm={ph:.4f}  d={d:+.2f}  cliff={cd:+.2f}{star}")
+configs=list(data.keys())
+chi2,p=stats.friedmanchisquare(*[vec(c) for c in configs])
+print("Friedman omnibus (F1): chi2 = %.2f, df = %d, p = %.3e\n" % (chi2, len(configs)-1, p))
 
-# ---- TOST equivalence ----
-def tost_paired(a, b, margin):
-    diff = [x - y for x, y in zip(a, b)]
-    m, sd = mean_sd(diff)
-    n = len(diff)
-    se = sd / math.sqrt(n)
-    if se == 0:
-        return (0.0, abs(m) < margin)
-    t_lower = (m - (-margin)) / se   # H0: diff <= -margin
-    t_upper = (m - margin) / se      # H0: diff >= +margin
-    df = n - 1
-    p_lower = stats.t.sf(t_lower, df)      # upper tail
-    p_upper = stats.t.cdf(t_upper, df)     # lower tail
-    p_tost = max(p_lower, p_upper)
-    return (p_tost, p_tost < 0.05)
+FAMILIES = {
+ "H1 (modern encoders > BERT)": [("neobert","bert"),("modernbert","bert"),("spanbert","bert")],
+ "H3 (encoder adaptation > frozen heads)": [("partial_ft","lstm_l3"),("partial_ft","linear")],
+}
+print("=== Confirmatory pairwise tests (Holm within each hypothesis family) ===")
+print("%-24s %8s %8s %10s %-18s %7s %7s" % ("comparison","raw p","Holm p","mean diff","95% CI","d","r_rb"))
+for fam,pairs in FAMILIES.items():
+    print("--", fam)
+    hp=holm([wilcox(a,b) for a,b in pairs])
+    for (a,b),h in zip(pairs,hp):
+        m,c95,_=ci(a,b)
+        print("%-24s %8.4f %8.4f %+10.4f [%+.3f, %+.3f] %+7.2f %+7.2f" %
+              (a+" vs "+b, wilcox(a,b), h, m, c95[0], c95[1], cohend(a,b), rank_biserial(a,b)))
 
-MARGIN = 0.05
-print("\n" + "=" * 68)
-print(f"TOST EQUIVALENCE (margin +/- {MARGIN} F1)")
-print("=" * 68)
-print("H4 (LSTM depth negligible):")
-for a, b in [("lstm_l1", "lstm_l2"), ("lstm_l1", "lstm_l3"), ("lstm_l2", "lstm_l3")]:
-    p_t, equiv = tost_paired(vec(a), vec(b), MARGIN)
-    md = mean_sd([x - y for x, y in zip(vec(a), vec(b))])[0]
-    verdict = "EQUIVALENT" if equiv else "not equivalent"
-    print(f"  {a} vs {b:8s}  mean_diff={md:+.4f}  p_TOST={p_t:.4f}  -> {verdict}")
-print("H5 (linear vs LSTM heads):")
-for b in ["lstm_l1", "lstm_l2", "lstm_l3"]:
-    p_t, equiv = tost_paired(vec("linear"), vec(b), MARGIN)
-    md = mean_sd([x - y for x, y in zip(vec("linear"), vec(b))])[0]
-    verdict = "EQUIVALENT" if equiv else "not equivalent"
-    print(f"  linear vs {b:8s}  mean_diff={md:+.4f}  p_TOST={p_t:.4f}  -> {verdict}")
+print("\n=== Equivalence (TOST via 90% CI of mean diff), margin sensitivity ===")
+for label,pairs in [("H4 LSTM depth",[("lstm_l1","lstm_l2"),("lstm_l1","lstm_l3"),("lstm_l2","lstm_l3")]),
+                    ("H5 linear vs LSTM",[("linear","lstm_l1"),("linear","lstm_l2"),("linear","lstm_l3")])]:
+    print("--", label)
+    for a,b in pairs:
+        m,_,c90=ci(a,b)
+        eq=lambda mg: "equiv" if (c90[0]>-mg and c90[1]<mg) else "  no "
+        print("%-20s mean %+.4f 90%% CI [%+.3f, %+.3f]  ±0.02:%s ±0.03:%s ±0.05:%s" %
+              (a+" vs "+b, m, c90[0], c90[1], eq(.02), eq(.03), eq(.05)))
