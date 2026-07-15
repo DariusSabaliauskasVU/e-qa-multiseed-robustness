@@ -51,7 +51,7 @@ Frozen models cache the BERT embeddings once and train only the head per seed
 ## Analyse (paired tests — valid because the split is fixed)
 ```
 python analyze_results.py --metric F1     # Friedman + Holm-Wilcoxon + Cohen's d
-python targeted_analysis.py               # per-hypothesis Holm families + Cliff's delta + TOST (H4/H5)
+python targeted_analysis.py               # per-hypothesis Holm families + rank-biserial + TOST + unpaired sensitivity
 ```
 
 ## Reproduce the figures
@@ -65,7 +65,7 @@ python graphical_abstract.py # graphical abstract
 |---|---|
 | `run_experiments.py` | Unified training/evaluation pipeline (all 10 configs). |
 | `analyze_results.py` | Friedman + pairwise Wilcoxon/Holm + Cohen's d. |
-| `targeted_analysis.py` | Pre-specified hypothesis-family Holm + Cliff's delta + TOST equivalence. |
+| `targeted_analysis.py` | Per-hypothesis-family Holm–Wilcoxon + matched-pairs rank-biserial + TOST equivalence, with an unpaired (Mann–Whitney) sensitivity check. |
 | `mkfigs2.py`, `graphical_abstract.py` | Figure / graphical-abstract generation. |
 | `requirements-test-120-fixed.json` | RE-120 extractive-QA test set (120 items, verified spans). |
 | `results_clean.csv` | Final per-seed results used in the paper (10 models × 10 seeds). |
@@ -84,4 +84,3 @@ If you use this code or the RE-120 test set, please cite the paper and this repo
 
 ## License
 Code: MIT (see `LICENSE`). Data (`requirements-test-120-fixed.json`): CC BY 4.0.
-Confirm/adjust before publishing.

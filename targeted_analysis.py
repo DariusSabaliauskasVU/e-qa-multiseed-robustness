@@ -76,3 +76,11 @@ for label,pairs in [("H4 LSTM depth",[("lstm_l1","lstm_l2"),("lstm_l1","lstm_l3"
         eq=lambda mg: "equiv" if (c90[0]>-mg and c90[1]<mg) else "  no "
         print("%-20s mean %+.4f 90%% CI [%+.3f, %+.3f]  ±0.02:%s ±0.03:%s ±0.05:%s" %
               (a+" vs "+b, m, c90[0], c90[1], eq(.02), eq(.03), eq(.05)))
+
+# Sensitivity check that does not rely on seed pairing: unpaired Mann-Whitney U
+# on the per-seed F1 distributions, for the confirmatory (H1, H3) contrasts.
+print("\n=== Unpaired sensitivity (Mann-Whitney U), does NOT assume seed pairing ===")
+print("%-24s %10s %12s" % ("comparison", "paired p", "unpaired p"))
+for a, b in FAMILIES["H1 (modern encoders > BERT)"] + FAMILIES["H3 (encoder adaptation > frozen heads)"]:
+    _, up = stats.mannwhitneyu(vec(a), vec(b), alternative="two-sided")
+    print("%-24s %10.4f %12.4f" % (a + " vs " + b, wilcox(a, b), up))
