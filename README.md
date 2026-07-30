@@ -115,8 +115,8 @@ python graphical_abstract.py      # graphical abstract
 | `results_clean.csv` | Per-seed results reported in the paper (10 configurations × 10 seeds). |
 | `requirements.txt` | Pinned dependency versions. |
 | `Figure_1.pdf` | ⟨FILL: one line — what this figure shows⟩ |
-| `data/` | ⟨FILL: one line — what this folder contains⟩ |
-| `supplementary/` | ⟨FILL: one line — what this folder contains⟩ |
+| `data/` | RE-120 provenance table (per-item source, category, span status) and the per-document summary table. |
+| `supplementary/` | Per-seed result tables for all ten configurations, plus full confirmatory statistics and the equivalence-margin sensitivity analysis. |
 | `LICENSE` | MIT licence for the code. |
 
 ## Environment
@@ -155,7 +155,15 @@ If you use this code or the RE-120 test set, please cite this repository:
 Code: MIT (see `LICENSE`).
 
 Data: the RE-120 questions, answer spans and annotations are released under
-CC BY 4.0. The context passages are quoted from four publicly available software
-requirements specifications and remain under their original terms: the CCTNS SRS
-(law enforcement, 30 items), the GAMMA-J Web Store SRS (e-commerce, 29), the IUFA
-SRS (university IT asset management, 31), and the PeaZip SRS (desktop utility, 30).
+CC BY 4.0.
+
+The context passages are **not** ours. They are quoted from four requirements
+specifications distributed in the PURE dataset of public requirements documents
+(https://zenodo.org/records/7118517) and remain under the terms of that record:
+CCTNS SRS (law enforcement, 30 items), GAMMA-J Web Store SRS (e-commerce, 29),
+IUFA SRS (university IT asset management, 31), and PeaZip SRS (desktop utility,
+30). Per-item provenance, including source document and URL, is recorded in
+`data/RE120_provenance.csv`.
+
+Item categories: 78 functional, 13 non-functional, 13 behavioural, 16
+data-related. Span status: 47 human-confirmed, 41 exact matches, 32 case-fixed.
