@@ -1,4 +1,5 @@
 import csv, math, matplotlib
+from pathlib import Path
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 plt.rcParams.update({'font.family':'DejaVu Serif','font.size':9,'axes.linewidth':0.8,
@@ -7,7 +8,7 @@ plt.rcParams.update({'font.family':'DejaVu Serif','font.size':9,'axes.linewidth'
 SEEDS=[13,42,73,101,123,202,333,777,1337,2024]
 COLS={'EM':4,'F1':5,'ROUGE-L':6}
 data={}
-for r in csv.reader(open('repro/results_clean.csv')):
+for r in csv.reader(open(Path(__file__).with_name('results_clean.csv'), newline='', encoding='utf-8')):
     if r[0]=='config': continue
     data.setdefault(r[0],{})[int(r[1])]={'EM':float(r[4]),'F1':float(r[5]),'ROUGE-L':float(r[6])}
 

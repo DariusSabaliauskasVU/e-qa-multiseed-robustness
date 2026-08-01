@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Confirmatory statistics for the RE-QA multi-seed study (F1 column).
 
-Paired tests are valid: the same ten seeds and the same fixed grouped train/val split
-are reused across all models (a common-random-numbers design), so per-seed scores are
-matched across configurations.
+All configurations use the same fixed grouped train/val split and the same predefined
+seed labels. Seed labels are treated as common experimental blocks, although identical
+numerical seeds do not imply identical stochastic trajectories across architectures; an
+unpaired Mann-Whitney analysis is therefore included as a sensitivity check.
 
 Reports, matching the manuscript exactly:
   * Friedman omnibus.
@@ -33,7 +34,7 @@ def ci(a, b):
     sd=math.sqrt(sum((x-m)**2 for x in df)/(n-1)); se=sd/math.sqrt(n)
     return m, (m-stats.t.ppf(.975,n-1)*se, m+stats.t.ppf(.975,n-1)*se), \
               (m-stats.t.ppf(.95,n-1)*se,  m+stats.t.ppf(.95,n-1)*se)   # mean, 95% CI, 90% CI
-def cohend(a, b):
+def cohens_dz(a, b):
     df=[x-y for x,y in zip(vec(a),vec(b))]; m=sum(df)/len(df)
     return m/math.sqrt(sum((x-m)**2 for x in df)/(len(df)-1))
 def rank_biserial(a, b):
@@ -58,14 +59,14 @@ FAMILIES = {
  "H3 (encoder adaptation > frozen heads)": [("partial_ft","lstm_l3"),("partial_ft","linear")],
 }
 print("=== Confirmatory pairwise tests (Holm within each hypothesis family) ===")
-print("%-24s %8s %8s %10s %-18s %7s %7s" % ("comparison","raw p","Holm p","mean diff","95% CI","d","r_rb"))
+print("%-24s %8s %8s %10s %-18s %7s %7s" % ("comparison","raw p","Holm p","mean diff","95% CI","d_z","r_rb"))
 for fam,pairs in FAMILIES.items():
     print("--", fam)
     hp=holm([wilcox(a,b) for a,b in pairs])
     for (a,b),h in zip(pairs,hp):
         m,c95,_=ci(a,b)
         print("%-24s %8.4f %8.4f %+10.4f [%+.3f, %+.3f] %+7.2f %+7.2f" %
-              (a+" vs "+b, wilcox(a,b), h, m, c95[0], c95[1], cohend(a,b), rank_biserial(a,b)))
+              (a+" vs "+b, wilcox(a,b), h, m, c95[0], c95[1], cohens_dz(a,b), rank_biserial(a,b)))
 
 print("\n=== Equivalence (TOST via 90% CI of mean diff), margin sensitivity ===")
 for label,pairs in [("H4 LSTM depth",[("lstm_l1","lstm_l2"),("lstm_l1","lstm_l3"),("lstm_l2","lstm_l3")]),

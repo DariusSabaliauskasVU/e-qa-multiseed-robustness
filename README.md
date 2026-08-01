@@ -4,9 +4,10 @@ Code and data accompanying the paper "Assessing Answer Span Detection of
 BERT-Based Architectures for Requirements Engineering QA Tasks: A Multi-Seed
 Robustness Study."
 
-A single script runs all ten configurations under identical conditions, varying
-only the model/adaptation and the random seed. This supersedes the earlier
-per-model scripts and standardises the protocol across the full comparison.
+A unified pipeline runs all ten configurations using the same fixed grouped
+training/validation split, the RE-120 test set, the same evaluation procedure,
+and the same predefined seed labels. Configuration-specific training
+hyperparameters follow the experimental protocol reported in the manuscript.
 
 ## Experimental controls
 
@@ -36,7 +37,7 @@ Seeds: 13, 42, 73, 101, 123, 202, 333, 777, 1337, 2024.
 
 ## Install
 
-Requires Python ⟨FILL: 3.x⟩. Pinned dependencies: `torch==2.3.1`,
+Requires Python 3.10 or newer. Pinned dependencies: `torch==2.3.1`,
 `transformers==4.44.2`, `datasets==2.20.0`, `numpy==1.26.4`, `scipy==1.13.1`.
 For GPU, install a CUDA-matched torch build (see https://pytorch.org).
 
@@ -82,23 +83,29 @@ Frozen models cache the BERT embeddings once and train only the head per seed
 (~20 GB RAM at `--squad-limit 30000`). Keep `--squad-limit` identical for every
 model.
 
-## Analyse (paired tests — valid because the split is fixed)
+## Analyse (primary seed-blocked tests and unpaired sensitivity analysis)
 
-The analysis scripts read `results_clean.csv`, which is the generated
-`results_per_seed.csv` after ⟨FILL: describe the step, or write "no changes
-other than the filename" if that is the case⟩. It contains exactly the 100 runs
-reported in the paper.
+Seed labels are used as common experimental blocks in the primary analysis.
+Because identical numerical seeds do not imply identical stochastic trajectories
+across architectures, an unpaired Mann-Whitney sensitivity analysis is also
+reported.
+
+The analysis scripts read `results_clean.csv`, which is `results_per_seed.csv`
+renamed after a validation check (10 configurations x 10 unique seeds = 100 rows,
+no duplicate config+seed, no missing values); no numerical values are changed.
+It contains exactly the 100 runs reported in the paper.
 
 ```bash
-python analyze_results.py --metric F1     # Friedman + Holm-Wilcoxon + Cohen's d
-python targeted_analysis.py               # per-hypothesis Holm families + rank-biserial + TOST + unpaired sensitivity
+python analyze_results.py --metric F1     # exploratory all-pair Friedman + Holm-Wilcoxon + Cohen's d_z
+python targeted_analysis.py               # manuscript confirmatory: per-hypothesis Holm families + paired d_z + matched-pairs r_rb + TOST + Mann-Whitney sensitivity
 ```
 
 ## Reproduce the figures
 
 ```bash
-python mkfigs2.py                 # Figure 2 (F1) and Figure 3 (ROUGE-L) box plots
-python plot_efficiency_pareto.py  # accuracy / training-time trade-off
+python mkfigs2.py                 # Figure 2: F1 distributions
+python plot_efficiency_pareto.py  # Figure 3: performance-time trade-off (Pareto)
+python plot_relative_profile.py   # Figure 4: relative metric profile
 python graphical_abstract.py      # graphical abstract
 ```
 
@@ -107,14 +114,14 @@ python graphical_abstract.py      # graphical abstract
 | Path | Description |
 |---|---|
 | `run_experiments.py` | Unified training/evaluation pipeline (all 10 configs). |
-| `analyze_results.py` | Friedman + pairwise Wilcoxon/Holm + Cohen's d. |
+| `analyze_results.py` | Optional exploratory all-pair Friedman + Wilcoxon/Holm + Cohen's d_z. |
 | `targeted_analysis.py` | Per-hypothesis-family Holm–Wilcoxon + matched-pairs rank-biserial + TOST equivalence, with an unpaired (Mann–Whitney) sensitivity check. |
-| `mkfigs2.py`, `plot_efficiency_pareto.py`, `graphical_abstract.py` | Figure and graphical-abstract generation. |
+| `mkfigs2.py`, `plot_efficiency_pareto.py`, `plot_relative_profile.py`, `graphical_abstract.py` | Figure and graphical-abstract generation (Figures 2, 3, 4, and the graphical abstract). |
 | `test_frozen.py`, `test_windowing.py` | Unit tests for the frozen-cache and windowing logic. |
 | `requirements-test-120-fixed.json` | RE-120 extractive-QA test set (120 items, verified spans). |
 | `results_clean.csv` | Per-seed results reported in the paper (10 configurations × 10 seeds). |
 | `requirements.txt` | Pinned dependency versions. |
-| `Figure_1.pdf` | ⟨FILL: one line — what this figure shows⟩ |
+| `Figure_1.pdf` | BPMN diagram of the experimental workflow (data preparation, model configuration, multi-seed training, evaluation). |
 | `data/` | RE-120 provenance table (per-item source, category, span status) and the per-document summary table. |
 | `supplementary/` | Per-seed result tables for all ten configurations, plus full confirmatory statistics and the equivalence-margin sensitivity analysis. |
 | `LICENSE` | MIT licence for the code. |

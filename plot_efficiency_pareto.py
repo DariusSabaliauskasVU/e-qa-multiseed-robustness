@@ -1,4 +1,5 @@
 import csv, math, matplotlib
+from pathlib import Path
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 plt.rcParams.update({'font.family':'DejaVu Serif','font.size':9,'pdf.fonttype':42,'ps.fonttype':42})
@@ -6,7 +7,7 @@ plt.rcParams.update({'font.family':'DejaVu Serif','font.size':9,'pdf.fonttype':4
 S=[13,42,73,101,123,202,333,777,1337,2024]
 f1=csv_tm={}
 F1={}; TM={}
-for r in csv.reader(open('repro/results_clean.csv')):
+for r in csv.reader(open(Path(__file__).with_name('results_clean.csv'), newline='', encoding='utf-8')):
     if r[0]=='config': continue
     F1.setdefault(r[0],[]).append(float(r[5])); TM.setdefault(r[0],[]).append(float(r[3]))
 mean=lambda d,c: sum(d[c])/len(d[c])

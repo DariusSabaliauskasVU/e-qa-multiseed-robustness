@@ -13,7 +13,7 @@ for r in csv.reader(open('results_clean.csv')):
 mean={k:sum(v)/len(v) for k,v in f1.items()}
 LAB={'neobert':'NeoBERT','modernbert':'ModernBERT','spanbert':'SpanBERT','bert':'BERT',
      'distilbert':'DistilBERT','partial_ft':'Partial FT','lstm_l3':'LSTM-3L','lstm_l1':'LSTM-1L',
-     'lstm_l2':'LSTM-2L','linear':'Linear'}
+     'lstm_l2':'LSTM-2L','linear':'BERT+FF'}
 TIER={'neobert':2,'modernbert':2,'spanbert':2,'bert':2,'distilbert':2,'partial_ft':1,
       'lstm_l3':0,'lstm_l1':0,'lstm_l2':0,'linear':0}
 order=sorted(mean, key=lambda k:mean[k])   # ascending for barh
@@ -29,7 +29,7 @@ stages=[
  ('Inputs','SQuAD v2 (answerable)\n+ RE-120 test set\n(120 Q–A pairs)'),
  ('10 configurations','Encoder adaptation:\nfrozen → partial → full FT\n× decoder type / LSTM depth'),
  ('Multi-seed protocol','10 random seeds each\nearly stopping\nEM / F1 / ROUGE-L'),
- ('Statistical analysis','Friedman + Wilcoxon\n(Holm) + Cohen’s d\n+ Cliff’s δ + TOST'),
+ ('Statistical analysis','Friedman + Holm-Wilcoxon\npaired d_z + r_rb + TOST\n+ Mann-Whitney sensitivity'),
 ]
 n=len(stages); bw=20; gap=(100-n*bw)/(n+1)
 for i,(t,b) in enumerate(stages):

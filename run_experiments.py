@@ -611,7 +611,7 @@ def main():
     ap.add_argument("--config", default="all", help="'all' or comma-separated config names (e.g. neobert,lstm_l1)")
     ap.add_argument("--seeds", type=int, nargs="+",
                     default=[13,42,73,101,123,202,333,777,1337,2024])
-    ap.add_argument("--squad-limit", type=int, default=60000)
+    ap.add_argument("--squad-limit", type=int, default=30000)
     ap.add_argument("--data", default="requirements-test-120-fixed.json")
     ap.add_argument("--out", default="results_per_seed.csv")
     ap.add_argument("--smoke", action="store_true", help="tiny CPU end-to-end check")
