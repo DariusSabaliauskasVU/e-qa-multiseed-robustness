@@ -1,5 +1,4 @@
 import csv, math, matplotlib
-from pathlib import Path
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 plt.rcParams.update({'font.family':'DejaVu Serif','font.size':9,'axes.linewidth':0.8,
@@ -8,7 +7,7 @@ plt.rcParams.update({'font.family':'DejaVu Serif','font.size':9,'axes.linewidth'
 SEEDS=[13,42,73,101,123,202,333,777,1337,2024]
 COLS={'EM':4,'F1':5,'ROUGE-L':6}
 data={}
-for r in csv.reader(open(Path(__file__).with_name('results_clean.csv'), newline='', encoding='utf-8')):
+for r in csv.reader(open('results_clean.csv')):
     if r[0]=='config': continue
     data.setdefault(r[0],{})[int(r[1])]={'EM':float(r[4]),'F1':float(r[5]),'ROUGE-L':float(r[6])}
 
@@ -46,4 +45,6 @@ def boxfig(metric, ylabel, fname, aspect):
     print('wrote',fname,'order:',[l.replace(chr(10),' ') for l in labels])
 
 boxfig('F1','F1 score','Figure_2', 2.80)
-boxfig('ROUGE-L','ROUGE-L score','Figure_3', 2.66)
+# Figure 3 in the paper is the accuracy/time trade-off (plot_efficiency_pareto.py);
+# the ROUGE-L box plot is supplementary, so it is written under a separate name.
+boxfig('ROUGE-L','ROUGE-L score','Figure_S_ROUGE-L', 2.66)

@@ -20,7 +20,7 @@ order=sorted(mean, key=lambda k:mean[k])   # ascending for barh
 COL={2:'#2E4C73',1:'#6A8CBF',0:'#B8CCE4'}
 EDGE='#22384f'
 
-fig=plt.figure(figsize=(11.6,4.64))   # 2.5:1 -> >=1328x531 px at any dpi
+fig=plt.figure(figsize=(11.6,4.64))   # 2.5:1 aspect ratio
 fig.patch.set_facecolor('white')
 
 # ============ TOP: pipeline flow ============
@@ -68,10 +68,10 @@ kbox=FancyBboxPatch((0.1,0.2),9.8,9.6,boxstyle='round,pad=0.2,rounding_size=0.3'
 axk.add_patch(kbox)
 axk.text(0.7,9.0,'Key findings',fontsize=10.5,fontweight='bold',color='#12212f')
 pts=[
- 'Encoder adaptation is the dominant factor:\nfrozen ≈ 0.54 vs. fine-tuned 0.70–0.77 F1.',
+ 'Encoder adaptation is the largest observed factor:\nfrozen ≈ 0.54 vs. fine-tuned 0.70–0.77 F1.',
  'Modern encoders (NeoBERT, ModernBERT) lead,\nbut are statistically indistinguishable.',
- 'LSTM depth and a linear vs. LSTM decoder are\nequivalent (TOST, ±0.05 F1).',
- 'Evaluation methodology can reverse model\nrankings — multi-seed testing is essential.',
+ 'LSTM depth, and a feed-forward vs. LSTM head,\nare equivalent (TOST, ±0.05 F1).',
+ 'Evaluation-protocol choices can materially alter\narchitectural conclusions.',
 ]
 yy=8.1
 for p in pts:
@@ -82,5 +82,4 @@ for p in pts:
 fig.savefig('Graphical_Abstract.pdf'); fig.savefig('Graphical_Abstract.png',dpi=300)
 plt.close(fig)
 from PIL import Image
-im=Image.open('Graphical_Abstract.png')
-print('size px (WxH):',im.size,'  >= 1328x531 required (WxH)')
+print('Graphical_Abstract size px (WxH):', Image.open('Graphical_Abstract.png').size)

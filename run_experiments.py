@@ -3,10 +3,10 @@
 Unified, methodology-corrected training/evaluation pipeline for
 "Assessing Answer Span Detection of BERT-Based Architectures for RE QA Tasks".
 
-One script runs all 10 configurations under IDENTICAL conditions
+One script runs all 10 configurations under matched conditions
 (same tokenizer settings, MAX_LEN, sliding window, train/val split, span
 decoding, and metrics), varying ONLY the model/adaptation and the random
-seed. This is the clean ablation the reviewers asked for.
+seed. This is the controlled ablation reported in the paper.
 
 Fixes applied vs. the original per-model scripts:
   1. RE-120 loaded from the corrected JSON (exact `answer_start` spans).
@@ -611,7 +611,7 @@ def main():
     ap.add_argument("--config", default="all", help="'all' or comma-separated config names (e.g. neobert,lstm_l1)")
     ap.add_argument("--seeds", type=int, nargs="+",
                     default=[13,42,73,101,123,202,333,777,1337,2024])
-    ap.add_argument("--squad-limit", type=int, default=30000)
+    ap.add_argument("--squad-limit", type=int, default=60000)
     ap.add_argument("--data", default="requirements-test-120-fixed.json")
     ap.add_argument("--out", default="results_per_seed.csv")
     ap.add_argument("--smoke", action="store_true", help="tiny CPU end-to-end check")

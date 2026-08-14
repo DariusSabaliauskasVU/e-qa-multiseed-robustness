@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """Paired statistical re-analysis of results_per_seed.csv.
-Valid when every model was run on the SAME fixed train/val split (only the
-model-init seed varied) -> results are paired by seed, so use paired tests.
+Applicable when every model was run on the same fixed train/val split (only the
+model-init seed varied) -> results are matched by seed label, so paired tests are used.
 
 Outputs: Friedman omnibus, pairwise Wilcoxon signed-rank with Holm correction,
-Cohen's d (paired), and a summary table. Kruskal-Wallis is reported too for
-comparison with the previous (unpaired) analysis.
+Cohen's d (paired), and a summary table. An unpaired Kruskal-Wallis test is also
+reported as a sensitivity check.
 """
 import argparse, csv, collections, itertools, math
 from scipy import stats
@@ -53,45 +53,6 @@ def main():
         sig='*' if holm[i]<0.05 else ''
         print(f"  {x+' vs '+y:32s} {p:9.4f} {holm[i]:9.4f} {d:+7.2f} {sig}")
 
-
-
-# ============================================================
-# Extensions: Cliff's delta (non-parametric effect size) + paired TOST equivalence
-# ============================================================
-def cliffs_delta(a, b):
-    n = len(a) * len(b)
-    gt = sum(1 for x in a for y in b if x > y)
-    lt = sum(1 for x in a for y in b if x < y)
-    d = (gt - lt) / n
-    ad = abs(d)
-    mag = ('negligible' if ad < 0.147 else 'small' if ad < 0.33 else 'medium' if ad < 0.474 else 'large')
-    return d, mag
-
-def tost_paired(a, b, margin):
-    """Paired TOST equivalence: are the paired means within +/- margin (raw units)?
-    Returns (mean_diff, p_TOST, equivalent?). Equivalent if p_TOST < 0.05."""
-    import statistics as st
-    diffs = [x - y for x, y in zip(a, b)]
-    n = len(diffs); m = st.mean(diffs); sd = st.stdev(diffs); se = sd / n ** 0.5
-    if se == 0:
-        return m, (0.0 if abs(m) < margin else 1.0), abs(m) < margin
-    t_low = (m + margin) / se; p_low = stats.t.sf(t_low, n - 1)
-    t_up = (m - margin) / se;  p_up = stats.t.cdf(t_up, n - 1)
-    p = max(p_low, p_up)
-    return m, p, p < 0.05
-
-def equivalence_report(vec, margin=0.05):
-    print(f"\n=== Equivalence (paired TOST, margin = +/-{margin} F1) + Cliff's delta ===")
-    H4 = [('lstm_l1','lstm_l2'),('lstm_l1','lstm_l3'),('lstm_l2','lstm_l3')]
-    H5 = [('linear','lstm_l1'),('linear','lstm_l2'),('linear','lstm_l3')]
-    for label, pairs in [('H4 (LSTM depth)', H4), ('H5 (linear vs LSTM)', H5)]:
-        print(f"  {label}:")
-        for x, y in pairs:
-            if x not in vec or y not in vec:
-                print(f"    {x} vs {y}: (missing)"); continue
-            md, p, eq = tost_paired(vec[x], vec[y], margin)
-            cd, mag = cliffs_delta(vec[x], vec[y])
-            print(f"    {x:8s} vs {y:8s}  mean_diff={md:+.4f}  TOST p={p:.3f}  {'EQUIVALENT' if eq else 'not equiv.'}  | Cliff d={cd:+.2f} ({mag})")
 
 if __name__=="__main__":
     main()
