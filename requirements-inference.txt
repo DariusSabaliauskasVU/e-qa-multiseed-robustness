@@ -1,0 +1,7 @@
+# Environment used for the inference-cost measurements (Table 8).
+# Install the CUDA 12.8 build of torch first (see https://pytorch.org), e.g.
+#   pip install torch==2.8.0 --index-url https://download.pytorch.org/whl/cu128
+torch==2.8.0
+transformers==4.57.1
+xformers==0.0.32.post2
+numpy

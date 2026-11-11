@@ -119,6 +119,35 @@ python graphical_abstract.py      # graphical abstract
 | `supplementary/` | Per-seed result tables for all ten configurations, plus full confirmatory statistics and the equivalence-margin sensitivity analysis. |
 | `LICENSE` | MIT licence for the code. |
 
+## Inference cost (Table 8)
+
+Inference latency and peak GPU memory do not depend on the values of the
+trained weights, so they are measured without checkpoints: each configuration
+is built exactly as in `run_experiments.py` (same backbone, head, `MAX_LEN`,
+sliding window and span decoding) and RE-120 is passed through it one question
+at a time in fp32.
+
+```bash
+pip install -r requirements-inference.txt
+python measure_inference.py --config all --device cuda --repeats 5
+```
+
+The script first runs a GPU burn-in until the GPU is in its maximum-performance
+state (P0), warms each configuration up for 15 s, times the forward pass and the
+span decoding for all 120 questions in five repeats, and records the GPU clock,
+temperature, power and P-state after every repeat. On a laptop, plug in the
+charger and select the maximum-performance power mode.
+
+Outputs (the files used in the paper are committed):
+
+- `inference_summary.csv` - mean and SD over repeats per configuration
+- `inference_per_run.csv` - one row per configuration and repeat
+- `inference_env.json` - GPU, driver, CUDA, PyTorch and Transformers versions
+
+Measured on Windows 11, Python 3.12.10, PyTorch 2.8.0+cu128,
+Transformers 4.57.1, xformers 0.0.32.post2 (required by NeoBERT),
+NVIDIA GeForce RTX 5090 Laptop GPU (driver 610.74).
+
 ## Environment
 
 Trained on a single NVIDIA GeForce RTX 5090 Laptop GPU (24 GB), 64 GB RAM.
