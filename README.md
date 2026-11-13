@@ -87,7 +87,14 @@ Frozen models cache the BERT embeddings once and train only the head per seed
 (~20 GB RAM at `--squad-limit 30000`). Keep `--squad-limit` identical for every
 model.
 
-## Analyse (paired tests — valid because the split is fixed)
+## Analyse (seed-blocked tests with unpaired sensitivity checks)
+
+The primary analysis matches the per-seed scores of different configurations by seed
+label. This blocking is an analysis convention, not a demonstrated dependence: identical
+seed labels do not give identical stochastic draws across architectures, and the fixed
+data split alone does not justify pairing. `targeted_analysis.py` therefore also prints
+unpaired checks (Mann–Whitney U for H1 and H3, unpaired Welch 90% confidence intervals
+for the H4 and H5 equivalence tests), and conclusions are read from both.
 
 The analysis scripts read `results_clean.csv`, which is the generated
 `results_per_seed.csv` with a single smoke-test row removed; no other changes were
@@ -113,7 +120,7 @@ python graphical_abstract.py      # graphical abstract
 |---|---|
 | `run_experiments.py` | Unified training/evaluation pipeline (all 10 configs). |
 | `analyze_results.py` | Friedman + pairwise Wilcoxon/Holm + Cohen's d. |
-| `targeted_analysis.py` | Per-hypothesis-family Holm–Wilcoxon + matched-pairs rank-biserial + TOST equivalence, with an unpaired (Mann–Whitney) sensitivity check. |
+| `targeted_analysis.py` | Per-hypothesis-family Holm–Wilcoxon + matched-pairs rank-biserial + TOST equivalence, with unpaired sensitivity checks (Mann–Whitney for H1/H3, Welch 90% CI for the H4/H5 equivalence tests). |
 | `mkfigs2.py`, `plot_efficiency_pareto.py`, `plot_relative_profile.py`, `graphical_abstract.py` | Figure and graphical-abstract generation (Figures 2, 3 and 4). |
 | `test_frozen.py`, `test_windowing.py` | Unit tests for the frozen-cache and windowing logic. |
 | `requirements-test-120-fixed.json` | RE-120 extractive-QA test set (120 items, verified spans). |

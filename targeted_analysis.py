@@ -4,8 +4,10 @@
 Paired tests are used because the same ten seed labels and the same fixed grouped
 train/val split are reused across all models, so per-seed scores are matched by seed
 label across configurations. Identical seed labels do not imply identical stochastic
-draws across architectures; an unpaired Mann-Whitney sensitivity check is therefore
-reported alongside the paired results.
+draws across architectures, so the blocking is an analysis convention rather than a
+demonstrated dependence. Unpaired sensitivity checks are therefore reported alongside
+the paired results: Mann-Whitney U for H1/H3 and Welch 90% confidence intervals of the
+difference in means for the H4/H5 equivalence conclusions.
 
 Reports, matching the manuscript exactly:
   * Friedman omnibus.
@@ -86,3 +88,20 @@ print("%-24s %10s %12s" % ("comparison", "paired p", "unpaired p"))
 for a, b in FAMILIES["H1 (modern encoders > BERT)"] + FAMILIES["H3 (encoder adaptation > frozen heads)"]:
     _, up = stats.mannwhitneyu(vec(a), vec(b), alternative="two-sided")
     print("%-24s %10.4f %12.4f" % (a + " vs " + b, wilcox(a, b), up))
+
+# Equivalence check that does not rely on seed pairing: Welch 90% CI of the difference
+# in mean F1 (unequal variances) for the H4/H5 pairs, against the same margins.
+def welch_ci90(a, b):
+    x, y = vec(a), vec(b); nx, ny = len(x), len(y)
+    mx, my = sum(x)/nx, sum(y)/ny
+    vx = sum((v-mx)**2 for v in x)/(nx-1)/nx; vy = sum((v-my)**2 for v in y)/(ny-1)/ny
+    se = math.sqrt(vx+vy); dof = (vx+vy)**2/(vx**2/(nx-1)+vy**2/(ny-1))
+    t = stats.t.ppf(.95, dof)
+    return mx-my, mx-my-t*se, mx-my+t*se
+print("\n=== Unpaired equivalence check (Welch 90% CI of mean diff), does NOT assume seed pairing ===")
+for a, b in [("lstm_l1","lstm_l2"),("lstm_l1","lstm_l3"),("lstm_l2","lstm_l3"),
+             ("linear","lstm_l1"),("linear","lstm_l2"),("linear","lstm_l3")]:
+    m, lo, hi = welch_ci90(a, b)
+    eq = lambda mg: "equiv" if (lo > -mg and hi < mg) else "  no "
+    print("%-20s mean %+.4f 90%% CI [%+.3f, %+.3f]  ±0.02:%s ±0.03:%s ±0.05:%s" %
+          (a+" vs "+b, m, lo, hi, eq(.02), eq(.03), eq(.05)))
