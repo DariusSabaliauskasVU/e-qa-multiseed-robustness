@@ -37,7 +37,8 @@ CONFIGS = {
     "bert":       dict(kind="ff",   backbone="bert-base-cased",              lr=3e-5, batch=16, epochs=10),
     "distilbert": dict(kind="ff",   backbone="distilbert-base-cased",        lr=1e-5, batch=16, epochs=15),
     "spanbert":   dict(kind="ff",   backbone="SpanBERT/spanbert-base-cased", lr=3e-5, batch=16, epochs=10),
-    "neobert":    dict(kind="ff_custom", backbone="chandar-lab/NeoBERT",     lr=3e-5, batch=16, epochs=10, trust_remote_code=True),
+    "neobert":    dict(kind="ff_custom", backbone="chandar-lab/NeoBERT",     lr=3e-5, batch=16, epochs=10, trust_remote_code=True,
+                       revision="5424c8efeea6491b151d62dee55a752165407430"),  # pinned: Hugging Face snapshot used for the paper
     "modernbert": dict(kind="ff",     backbone="answerdotai/ModernBERT-base",  lr=3e-5, batch=16, epochs=10),
     # frozen BERT + LSTM heads
     "lstm_l1":    dict(kind="frozen", backbone="bert-base-cased", lr=2e-5, batch=64, epochs=20, lstm=[768]),
@@ -142,13 +143,21 @@ def grouped_split(groups: List, val_fraction=VAL_FRACTION, seed=SPLIT_SEED):
     val_idx   = [i for i,g in enumerate(groups) if g in val_groups]
     return train_idx, val_idx
 
+# The runs reported in the paper seeded random, NumPy, torch and CUDA only and used
+# cuDNN with its default settings. The determinism settings below were added after
+# those runs (August 2026). Use --paper-seeding to reproduce the paper's seeding exactly.
+DETERMINISTIC = True
+
 def set_all_seeds(seed: int):
-    """Seed every relevant RNG for reproducibility (Python hash, random, NumPy, torch, CUDA),
-    and request deterministic cuDNN kernels."""
+    """Seed random, NumPy, torch and CUDA; unless --paper-seeding is given, also request
+    deterministic cuDNN kernels. (PYTHONHASHSEED only affects child processes; set it
+    in the shell before starting Python to fix str hashing.)"""
     os.environ["PYTHONHASHSEED"] = str(seed)
     torch = _torch()
     random.seed(seed); import numpy as np; np.random.seed(seed)
     torch.manual_seed(seed); torch.cuda.manual_seed_all(seed)
+    if not DETERMINISTIC:
+        return
     try:
         torch.backends.cudnn.deterministic = True
         torch.backends.cudnn.benchmark = False
@@ -272,14 +281,14 @@ def build_model(cfg):
     from transformers import AutoModel, AutoModelForQuestionAnswering
     trc = cfg.get("trust_remote_code", False)
     if cfg["kind"] == "ff":
-        return AutoModelForQuestionAnswering.from_pretrained(cfg["backbone"], trust_remote_code=trc)
+        return AutoModelForQuestionAnswering.from_pretrained(cfg["backbone"], trust_remote_code=trc, revision=cfg.get("revision"))
     if cfg["kind"] == "ff_custom":
         # Encoders (e.g. NeoBERT) that have no AutoModelForQuestionAnswering head:
         # load the base AutoModel and add a trainable linear span head. Everything is fine-tuned.
         class QAWrap(nn.Module):
             def __init__(self):
                 super().__init__()
-                self.encoder = AutoModel.from_pretrained(cfg["backbone"], trust_remote_code=trc)
+                self.encoder = AutoModel.from_pretrained(cfg["backbone"], trust_remote_code=trc, revision=cfg.get("revision"))
                 self.qa = nn.Linear(self.encoder.config.hidden_size, 2)
             def forward(self, input_ids, attention_mask):
                 out = self.encoder(input_ids=input_ids, attention_mask=attention_mask)
@@ -293,7 +302,7 @@ def build_model(cfg):
     class Head(nn.Module):
         def __init__(self, cfg):
             super().__init__()
-            self.encoder = AutoModel.from_pretrained(cfg["backbone"], trust_remote_code=trc)
+            self.encoder = AutoModel.from_pretrained(cfg["backbone"], trust_remote_code=trc, revision=cfg.get("revision"))
             for p in self.encoder.parameters(): p.requires_grad = False
             if cfg["kind"] == "partial" and cfg.get("unfreeze_last_n", 0) > 0:
                 for layer in self.encoder.encoder.layer[-cfg["unfreeze_last_n"]:]:
@@ -407,10 +416,24 @@ def evaluate_re120_frozen(head, eval_emb, eval_feats, re120, device, bs):
                 if score > per_q[q][1]:
                     per_q[q] = (text, score)
     em = f1 = rg = 0.0; Nq = len(re120["gold"])
+    LAST_PREDS[:] = [per_q[q][0] for q in range(Nq)]
     for q in range(Nq):
         pred = per_q[q][0]; gold = re120["gold"][q]
         em += compute_em(pred, gold); f1 += compute_f1(pred, gold); rg += rouge_l(pred, gold)
     return em/Nq, f1/Nq, rg/Nq
+
+# Optional per-question prediction dump (--save-preds DIR). It does not change training
+# or scoring; it only stores the predictions that the reported metrics are computed from.
+LAST_PREDS = []
+PRED_DIR = None
+
+def save_predictions(config_name, seed, re120, row):
+    if not PRED_DIR:
+        return
+    os.makedirs(PRED_DIR, exist_ok=True)
+    items = [dict(index=q, prediction=LAST_PREDS[q], gold=re120["gold"][q]) for q in range(len(re120["gold"]))]
+    with open(os.path.join(PRED_DIR, f"{config_name}_seed{seed}.json"), "w", encoding="utf-8") as fh:
+        json.dump(dict(config=config_name, seed=seed, metrics=row, items=items), fh, ensure_ascii=False, indent=1)
 
 def append_row(path, row):
     exists = os.path.exists(path)
@@ -424,7 +447,8 @@ def run_config(config_name, seeds, squad_limit, re120_path, out_csv, smoke=False
     import torch, numpy as np
     from transformers import AutoTokenizer, AutoModel
     cfg = CONFIGS[config_name]
-    tok = AutoTokenizer.from_pretrained(cfg["backbone"], trust_remote_code=cfg.get("trust_remote_code", False))
+    tok = AutoTokenizer.from_pretrained(cfg["backbone"], trust_remote_code=cfg.get("trust_remote_code", False),
+                                        revision=cfg.get("revision"))
     squad = load_squad(squad_limit, smoke=smoke)
     re120 = load_re120(re120_path)
     tr_idx, va_idx = grouped_split(squad["title"])
@@ -471,6 +495,7 @@ def run_config(config_name, seeds, squad_limit, re120_path, out_csv, smoke=False
             row = dict(config=config_name, seed=seed, epochs_at_convergence=epoch_done,
                        train_minutes=round(minutes, 2), EM=round(em, 4), F1=round(f1, 4), ROUGE_L=round(rg, 4))
             rows.append(row); append_row(out_csv, row)          # <-- per-seed write
+            save_predictions(config_name, seed, re120, row)
             print(f"[{config_name} seed={seed}] EM={em:.4f} F1={f1:.4f} ROUGE-L={rg:.4f} ({minutes:.1f} min)")
         return rows
 
@@ -502,6 +527,7 @@ def run_config(config_name, seeds, squad_limit, re120_path, out_csv, smoke=False
         row = dict(config=config_name, seed=seed, epochs_at_convergence=epoch_done,
                    train_minutes=round(minutes, 2), EM=round(em, 4), F1=round(f1, 4), ROUGE_L=round(rg, 4))
         rows.append(row); append_row(out_csv, row)              # <-- per-seed write
+        save_predictions(config_name, seed, re120, row)
         print(f"[{config_name} seed={seed}] EM={em:.4f} F1={f1:.4f} ROUGE-L={rg:.4f} ({minutes:.1f} min)")
     return rows
 
@@ -554,6 +580,7 @@ def evaluate_re120(model, cfg, eval_feats, re120, device, bs):
                 if score > per_q[q][1]:
                     per_q[q] = (text, score)
     em = f1 = rg = 0.0; N = len(re120["gold"])
+    LAST_PREDS[:] = [per_q[q][0] for q in range(N)]
     for q in range(N):
         pred = per_q[q][0]; gold = re120["gold"][q]
         em += compute_em(pred, gold); f1 += compute_f1(pred, gold); rg += rouge_l(pred, gold)
@@ -616,7 +643,15 @@ def main():
     ap.add_argument("--out", default="results_per_seed.csv")
     ap.add_argument("--smoke", action="store_true", help="tiny CPU end-to-end check")
     ap.add_argument("--selftest", action="store_true", help="test pure functions only (no torch)")
+    ap.add_argument("--paper-seeding", action="store_true",
+                    help="seed exactly as in the runs reported in the paper (no cuDNN determinism flags)")
+    ap.add_argument("--save-preds", default=None, metavar="DIR",
+                    help="also write per-question predictions to DIR/<config>_seed<seed>.json")
     args = ap.parse_args()
+    global DETERMINISTIC, PRED_DIR
+    PRED_DIR = args.save_preds
+    if args.paper_seeding:
+        DETERMINISTIC = False
     if args.selftest:
         selftest(); return
     if args.config == "all":

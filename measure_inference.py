@@ -79,7 +79,8 @@ def measure_config(name, args, device):
     import torch, numpy as np
     from transformers import AutoTokenizer
     cfg = CONFIGS[name]
-    tok = AutoTokenizer.from_pretrained(cfg["backbone"], trust_remote_code=cfg.get("trust_remote_code", False))
+    tok = AutoTokenizer.from_pretrained(cfg["backbone"], trust_remote_code=cfg.get("trust_remote_code", False),
+                                        revision=cfg.get("revision"))
     re120 = load_re120(args.data)
     feats = prepare_eval_features(re120, tok)
     by_q = collections.defaultdict(list)

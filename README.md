@@ -36,13 +36,18 @@ Seeds: 13, 42, 73, 101, 123, 202, 333, 777, 1337, 2024.
 
 ## Install
 
-Requires Python 3.10 or newer. Pinned dependencies: `torch==2.3.1`,
-`transformers==4.44.2`, `datasets==2.20.0`, `numpy==1.26.4`, `scipy==1.13.1`.
-For GPU, install a CUDA-matched torch build (see https://pytorch.org).
+The results in the paper were produced on Windows 11 in an Anaconda base
+environment with Python 3.13, PyTorch 2.12.0.dev20260218+cu128 (CUDA 12.8
+nightly), Transformers 4.55.0, Datasets 4.0.0, NumPy 2.1.3, SciPy 1.15.3 and
+xformers 0.0.34 (see `requirements.txt` for the full pinned list). RTX 50-series
+GPUs require a CUDA 12.8 build of PyTorch 2.7 or newer. NeoBERT is loaded from the
+pinned Hugging Face snapshot `5424c8efeea6491b151d62dee55a752165407430`.
 
 ```bash
 python -m venv .venv && source .venv/bin/activate
+pip install --pre torch --index-url https://download.pytorch.org/whl/nightly/cu128
 pip install -r requirements.txt
+pip install xformers==0.0.34 --no-deps
 ```
 
 ## Validate before spending GPU hours
@@ -148,13 +153,48 @@ Measured on Windows 11, Python 3.12.10, PyTorch 2.8.0+cu128,
 Transformers 4.57.1, xformers 0.0.32.post2 (required by NeoBERT),
 NVIDIA GeForce RTX 5090 Laptop GPU (driver 610.74).
 
+## Learning-rate sensitivity of the frozen heads (Table 9)
+
+```bash
+python lr_sensitivity.py        # lstm_l3 and linear, lr 2e-5 / 1e-4 / 1e-3, seeds 13 42 73
+```
+
+Retrains the three-layer LSTM head and the feed-forward head over frozen BERT
+with three learning rates; everything else is unchanged. Outputs:
+`lr_sensitivity_per_seed.csv` and `lr_sensitivity_summary.csv`.
+
+## BERTScore and breakdown by requirement category (Tables 10 and 11)
+
+```bash
+python run_experiments.py --config all --seeds 13 42 73 --squad-limit 30000 \
+       --paper-seeding --save-preds preds --out results_preds_run.csv
+pip install bert-score==0.3.13 --no-deps
+python compute_semantic_metrics.py --preds preds
+```
+
+`--save-preds` stores the per-question predictions of every run in
+`preds/<config>_seed<seed>.json`; it does not change training or scoring.
+`compute_semantic_metrics.py` computes BERTScore (roberta-large, rescaled with
+baseline; hash `roberta-large_L17_no-idf_version=0.3.12(hug_trans=4.55.0)-rescaled`)
+and the breakdown by requirement category and source document. Outputs:
+`semantic_metrics_per_run.csv`, `semantic_metrics_summary.csv`,
+`breakdown_by_category.csv`, `breakdown_by_document.csv`.
+
+DistilBERT and the four frozen-encoder configurations reproduce the seed-level
+scores in `results_clean.csv` exactly; the other encoder-training configurations
+differ slightly between reruns because cuDNN determinism was not enforced.
+
 ## Environment
 
 Trained on a single NVIDIA GeForce RTX 5090 Laptop GPU (24 GB), 64 GB RAM.
 
-Random seeds are controlled for the Python hash seed, NumPy state, PyTorch and
-CUDA seeds, and training-data shuffle order, with deterministic cuDNN settings;
-the training/validation partition is held fixed.
+Python, NumPy, PyTorch and CUDA random seeds and the training-data shuffle order
+are fixed for each seed. The runs reported in the paper used cuDNN with its
+default settings (benchmark mode off, non-deterministic kernels allowed), so
+reruns with the same seed may differ slightly. The cuDNN determinism settings in
+`set_all_seeds` were added after those runs; `--paper-seeding` disables them to
+reproduce the paper's seeding exactly. The training/validation partition is
+held fixed.
 
 Hugging Face model identifiers:
 

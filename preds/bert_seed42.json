@@ -1,0 +1,615 @@
+{
+ "config": "bert",
+ "seed": 42,
+ "metrics": {
+  "config": "bert",
+  "seed": 42,
+  "epochs_at_convergence": 4,
+  "train_minutes": 24.5,
+  "EM": 0.45,
+  "F1": 0.7393,
+  "ROUGE_L": 0.7393
+ },
+ "items": [
+  {
+   "index": 0,
+   "prediction": "to focus on the critical functionality that provides value to the police personnel at the cutting edge",
+   "gold": "to focus on the critical functionality that provides value to the police personnel at the cutting edge"
+  },
+  {
+   "index": 1,
+   "prediction": "The Citizen Interface module",
+   "gold": "Citizen Interface module"
+  },
+  {
+   "index": 2,
+   "prediction": "facilitates the investigation process",
+   "gold": "facilitates the investigation process and introduces operational efficiencies"
+  },
+  {
+   "index": 3,
+   "prediction": "a platform to record entries",
+   "gold": "providing a platform to record entries of the court interactions"
+  },
+  {
+   "index": 4,
+   "prediction": "modus operandi, property",
+   "gold": "particular person, type of crime, modus operandi, property"
+  },
+  {
+   "index": 5,
+   "prediction": "cases assigned, alerts, pending tasks",
+   "gold": "cases assigned, alerts, pending tasks"
+  },
+  {
+   "index": 6,
+   "prediction": "helps keep the application configured according to the states' requirements in addition to keeping data elements/rules up to date",
+   "gold": "keep the application configured according to the states' requirements in addition to keeping data elements/rules up to date"
+  },
+  {
+   "index": 7,
+   "prediction": "in the offline and online mode",
+   "gold": "both in the offline and online mode"
+  },
+  {
+   "index": 8,
+   "prediction": "enable the user to track the submitted defect or enhancement request",
+   "gold": "enable the user to track the submitted defect or enhancement request"
+  },
+  {
+   "index": 9,
+   "prediction": "a record of actions taken by either the user or the system triggers",
+   "gold": "a record of actions taken by either the user or the system triggers"
+  },
+  {
+   "index": 10,
+   "prediction": "All the actions",
+   "gold": "All the actions (create/read/update/delete)... The user initiating... The date and time"
+  },
+  {
+   "index": 11,
+   "prediction": "as long as required",
+   "gold": "at least for the life of the case to which it refers"
+  },
+  {
+   "index": 12,
+   "prediction": "admin-users",
+   "gold": "only admin-users"
+  },
+  {
+   "index": 13,
+   "prediction": "its existence",
+   "gold": "do not display any case information or indicate its existence"
+  },
+  {
+   "index": 14,
+   "prediction": "explanatory text",
+   "gold": "each error message will be accompanied by explanatory text and an indication of the action(s) which the user can take"
+  },
+  {
+   "index": 15,
+   "prediction": "Standard ISO 9241",
+   "gold": "ISO 9241"
+  },
+  {
+   "index": 16,
+   "prediction": "provided with alternative equivalent textual descriptions and/or with equivalent text-based functionality",
+   "gold": "provided with alternative equivalent textual descriptions and/or with equivalent text-based functionality"
+  },
+  {
+   "index": 17,
+   "prediction": "Splash screens should be avoided unless they provide useful content or feedback about the application state",
+   "gold": "avoided unless they provide useful content or feedback about the application state to the user"
+  },
+  {
+   "index": 18,
+   "prediction": "Vertical scrolling should be minimized",
+   "gold": "Vertical scrolling should be minimized"
+  },
+  {
+   "index": 19,
+   "prediction": "5-8 seconds",
+   "gold": "within 5-8 seconds"
+  },
+  {
+   "index": 20,
+   "prediction": "multiple search criteria) within 10-15 seconds",
+   "gold": "within 10-15 seconds"
+  },
+  {
+   "index": 21,
+   "prediction": "Core-Configuration-Customization",
+   "gold": "Core-Configuration-Customization"
+  },
+  {
+   "index": 22,
+   "prediction": "Service Oriented Architecture",
+   "gold": "Service Oriented Architecture (SOA)"
+  },
+  {
+   "index": 23,
+   "prediction": "HTTPS",
+   "gold": "HTTPS"
+  },
+  {
+   "index": 24,
+   "prediction": "soft tagging the row for deletion",
+   "gold": "Do not allow hard delete and perform only soft tagging the row for deletion"
+  },
+  {
+   "index": 25,
+   "prediction": "high standards of security and access control through... Prevent SQL Injection... Utilize parameterized queries",
+   "gold": "Utilize parameterized queries"
+  },
+  {
+   "index": 26,
+   "prediction": "on the web server",
+   "gold": "on the web server"
+  },
+  {
+   "index": 27,
+   "prediction": "in batches of 10 or 20 maximum",
+   "gold": "in batches of 10 or 20 maximum"
+  },
+  {
+   "index": 28,
+   "prediction": "AJAX",
+   "gold": "AJAX based technology"
+  },
+  {
+   "index": 29,
+   "prediction": "A hierarchical cache",
+   "gold": "hierarchical cache"
+  },
+  {
+   "index": 30,
+   "prediction": "USB Key",
+   "gold": "\"plug and play\" USB Key"
+  },
+  {
+   "index": 31,
+   "prediction": "20,000 items",
+   "gold": "20,000 items"
+  },
+  {
+   "index": 32,
+   "prediction": "Secure Socket Layer",
+   "gold": "Secure Socket Layer (SSL)"
+  },
+  {
+   "index": 33,
+   "prediction": "Sales Personnel",
+   "gold": "Sales Personnel"
+  },
+  {
+   "index": 34,
+   "prediction": "Intel based system",
+   "gold": "Slackware Linux 2.6"
+  },
+  {
+   "index": 35,
+   "prediction": "SQL standard",
+   "gold": "SQL based database"
+  },
+  {
+   "index": 36,
+   "prediction": "multi-tiered categories",
+   "gold": "into multi-tiered categories"
+  },
+  {
+   "index": 37,
+   "prediction": "API",
+   "gold": "an API to allow customers to build custom plug-ins to be able to meet their needs"
+  },
+  {
+   "index": 38,
+   "prediction": "less than 1 minute",
+   "gold": "less than 1 minute"
+  },
+  {
+   "index": 39,
+   "prediction": "1000",
+   "gold": "1000 customers"
+  },
+  {
+   "index": 40,
+   "prediction": "less than 1 second",
+   "gold": "less than 1 second"
+  },
+  {
+   "index": 41,
+   "prediction": "Dijkstra's shortest path algorithm",
+   "gold": "Dijkstra's shortest path algorithm"
+  },
+  {
+   "index": 42,
+   "prediction": "automatically compress",
+   "gold": "automatically compress image files that are too large in size"
+  },
+  {
+   "index": 43,
+   "prediction": "asynchronous loading",
+   "gold": "on demand asynchronous loading"
+  },
+  {
+   "index": 44,
+   "prediction": "auto detect IP DOS attacks and block IP automatically",
+   "gold": "auto detect IP DOS attacks and block IP automatically"
+  },
+  {
+   "index": 45,
+   "prediction": "Firestarter",
+   "gold": "Firestarter"
+  },
+  {
+   "index": 46,
+   "prediction": "the system prompts the Customer to resend login details to the email account",
+   "gold": "the system prompts the Customer to resend login details to the email account"
+  },
+  {
+   "index": 47,
+   "prediction": "email",
+   "gold": "confirmation email"
+  },
+  {
+   "index": 48,
+   "prediction": "ID that uniquely identified the selected item; a 7-digit system generated alphanumeric character",
+   "gold": "7-digit system generated alphanumeric character"
+  },
+  {
+   "index": 49,
+   "prediction": "Intel XScale PXA270 520-MHz chipset",
+   "gold": "Intel XScale PXA270 520-MHz chipset"
+  },
+  {
+   "index": 50,
+   "prediction": "128MB",
+   "gold": "128MB"
+  },
+  {
+   "index": 51,
+   "prediction": "1",
+   "gold": "1"
+  },
+  {
+   "index": 52,
+   "prediction": "Microsoft Internet Explorer version 6 and 7, Netscape Communicator Version 4 and 5",
+   "gold": "Microsoft Internet Explorer version 6 and 7, Netscape Communicator Version 4 and 5"
+  },
+  {
+   "index": 53,
+   "prediction": "less than 2ms",
+   "gold": "less than 2ms"
+  },
+  {
+   "index": 54,
+   "prediction": "through a live internet connection",
+   "gold": "periodic backups through a live internet connection"
+  },
+  {
+   "index": 55,
+   "prediction": "edit, and view accounts information",
+   "gold": "assigning privileges of accounts. It generally allows users to create, edit, and view accounts information"
+  },
+  {
+   "index": 56,
+   "prediction": "reinitializes software",
+   "gold": "System automatically installs patches and reinitializes software"
+  },
+  {
+   "index": 57,
+   "prediction": "99.999%",
+   "gold": "99.999%"
+  },
+  {
+   "index": 58,
+   "prediction": "Plug-ins",
+   "gold": "Plug-ins"
+  },
+  {
+   "index": 59,
+   "prediction": "SQL based database",
+   "gold": "SQL based database"
+  },
+  {
+   "index": 60,
+   "prediction": "to integrate 3 faculties data bases providing Web interface that allows user to access and manage the integrated inventory",
+   "gold": "integrate 3 faculties data bases"
+  },
+  {
+   "index": 61,
+   "prediction": "Rooms and space, Software licences, and All other assets",
+   "gold": "Rooms and space, Software licences, and All other assets"
+  },
+  {
+   "index": 62,
+   "prediction": "level 3",
+   "gold": "level 3"
+  },
+  {
+   "index": 63,
+   "prediction": "IT and security level",
+   "gold": "Level 4 is the IT and security level to maintain the inventory"
+  },
+  {
+   "index": 64,
+   "prediction": "University administrator and IT Administrators",
+   "gold": "University administrator and IT Administrators"
+  },
+  {
+   "index": 65,
+   "prediction": "create requests",
+   "gold": "create requests only"
+  },
+  {
+   "index": 66,
+   "prediction": "data base can be updated directly without any request",
+   "gold": "data base can be updated directly without any request"
+  },
+  {
+   "index": 67,
+   "prediction": "the university group",
+   "gold": "the university group"
+  },
+  {
+   "index": 68,
+   "prediction": "Ids",
+   "gold": "Ids"
+  },
+  {
+   "index": 69,
+   "prediction": "A bulk entry",
+   "gold": "bulk entry"
+  },
+  {
+   "index": 70,
+   "prediction": "IT group members",
+   "gold": "IT group members"
+  },
+  {
+   "index": 71,
+   "prediction": "email",
+   "gold": "by email"
+  },
+  {
+   "index": 72,
+   "prediction": "Any administrative level user can delegate another user to execute some or all his authorized actions",
+   "gold": "this user acquires the role of inventory administrator"
+  },
+  {
+   "index": 73,
+   "prediction": "Asset report by location, Request report, and User permission user",
+   "gold": "Asset report by location, Request report, and User permission user"
+  },
+  {
+   "index": 74,
+   "prediction": "2 to 4 hours",
+   "gold": "2 to 4 hours"
+  },
+  {
+   "index": 75,
+   "prediction": "out of working time",
+   "gold": "out of working time"
+  },
+  {
+   "index": 76,
+   "prediction": "IE, Firefox, Chrome, Opera or Safari",
+   "gold": "IE, Firefox, Chrome, Opera or Safari"
+  },
+  {
+   "index": 77,
+   "prediction": "killed",
+   "gold": "killed if takes more than 1 min"
+  },
+  {
+   "index": 78,
+   "prediction": "The Inventory Admin is authenticated",
+   "gold": "Inventory Admin is authenticated"
+  },
+  {
+   "index": 79,
+   "prediction": "Administrator send exception request to IT to add the new type and the common properties",
+   "gold": "Administrator send exception request to IT to add the new type and the common properties"
+  },
+  {
+   "index": 80,
+   "prediction": "clicking add another asset button",
+   "gold": "by clicking add another asset button"
+  },
+  {
+   "index": 81,
+   "prediction": "Exceptional Course",
+   "gold": "Error Message is displayed"
+  },
+  {
+   "index": 82,
+   "prediction": "Administrator cannot assigne permissions more than he have.",
+   "gold": "cannot assigne permissions more than he have"
+  },
+  {
+   "index": 83,
+   "prediction": "Fields can be sorted",
+   "gold": "Report can be filtered. Fields can be sorted"
+  },
+  {
+   "index": 84,
+   "prediction": "$22,400.00",
+   "gold": "$22,400.00"
+  },
+  {
+   "index": 85,
+   "prediction": "1120 hours",
+   "gold": "7 person months"
+  },
+  {
+   "index": 86,
+   "prediction": "$20",
+   "gold": "$20"
+  },
+  {
+   "index": 87,
+   "prediction": "Only IT team member",
+   "gold": "Only IT team member can access and maintain data base servers locally"
+  },
+  {
+   "index": 88,
+   "prediction": "5. search permission: 5.1. search:simple, 5.2. search advanced",
+   "gold": "5.1. search:simple, 5.2. search advanced"
+  },
+  {
+   "index": 89,
+   "prediction": "web based interface",
+   "gold": "use a web based interface"
+  },
+  {
+   "index": 90,
+   "prediction": "file and archive manager application for a computer system, aiming to provide a cross-platform graphical interface",
+   "gold": "general purpose file and archive manager application"
+  },
+  {
+   "index": 91,
+   "prediction": "Liles Athanasios-Alexandros, Software Engineering, AUTH",
+   "gold": "Liles Athanasios-Alexandros"
+  },
+  {
+   "index": 92,
+   "prediction": "to function as frontend for Pea archiving utility",
+   "gold": "to function as frontend for Pea archiving utility"
+  },
+  {
+   "index": 93,
+   "prediction": "x-86",
+   "gold": "x-86 compatible CPU"
+  },
+  {
+   "index": 94,
+   "prediction": "LGPL",
+   "gold": "LGPL"
+  },
+  {
+   "index": 95,
+   "prediction": "IDE",
+   "gold": "Lazarus IDE"
+  },
+  {
+   "index": 96,
+   "prediction": "Delphi/Kylix, Object Pascal, Pascal",
+   "gold": "Delphi/Kylix, Object Pascal, Pascal"
+  },
+  {
+   "index": 97,
+   "prediction": "the host system",
+   "gold": "MIPS (millions of integer instructions per second) and Core 2 Duo equivalent speed in MHz"
+  },
+  {
+   "index": 98,
+   "prediction": "securely remove files and folders from disk",
+   "gold": "securely remove files and folders from disk, avoiding possible data recovery"
+  },
+  {
+   "index": 99,
+   "prediction": "browsing and extraction",
+   "gold": "7z, 7z-sfx, ARC/WRC, BZ2/TBZ2, custom, GZ/TGZ, PAQ/LPAQ, PEA, QUAD/BALZ, split, TAR, UPX, ZIP, ACE, ARJ, CAB, CHM"
+  },
+  {
+   "index": 100,
+   "prediction": "is neither destroyed, nor deleted",
+   "gold": "it retains its content and name"
+  },
+  {
+   "index": 101,
+   "prediction": "password and optionally keyfile",
+   "gold": "password and optionally keyfile"
+  },
+  {
+   "index": 102,
+   "prediction": "PeaLauncher",
+   "gold": "PeaLauncher"
+  },
+  {
+   "index": 103,
+   "prediction": "all together the objects contained in the current path or in the archive",
+   "gold": "displays all together the objects contained in the current path or in the archive"
+  },
+  {
+   "index": 104,
+   "prediction": "POSIX",
+   "gold": "All 64-bit versions of Microsoft Windows, All 32-bit Microsoft Windows... All POSIX(all versions of Linux/all versions of BSD/all UNIX-like operating systems)"
+  },
+  {
+   "index": 105,
+   "prediction": "an x-86 compatible CPU",
+   "gold": "x-86 compatible CPU"
+  },
+  {
+   "index": 106,
+   "prediction": "no case",
+   "gold": "no"
+  },
+  {
+   "index": 107,
+   "prediction": "merge split volumes",
+   "gold": "Split file and merge split volumes back to the original file"
+  },
+  {
+   "index": 108,
+   "prediction": "spots exactly what the different bytes are and is not susceptible to collisions",
+   "gold": "spots exactly what the different bytes are"
+  },
+  {
+   "index": 109,
+   "prediction": "Localization",
+   "gold": "Localization"
+  },
+  {
+   "index": 110,
+   "prediction": "password/keyfile",
+   "gold": "set password/keyfile"
+  },
+  {
+   "index": 111,
+   "prediction": "create keyfile or random password",
+   "gold": "create keyfile or random password"
+  },
+  {
+   "index": 112,
+   "prediction": "Extraction... shouldn't be allowed without inserting the correct password and (if existing) keyfile",
+   "gold": "correct password and (if existing) keyfile"
+  },
+  {
+   "index": 113,
+   "prediction": "Portable Operating System Interface",
+   "gold": "Portable Operating System Interface for UNIX"
+  },
+  {
+   "index": 114,
+   "prediction": "Millions of Instructions per Second",
+   "gold": "Millions of Instructions per Second"
+  },
+  {
+   "index": 115,
+   "prediction": "The visible, user entry part of an application",
+   "gold": "The visible, user entry part of an application"
+  },
+  {
+   "index": 116,
+   "prediction": "A fixed-size datum",
+   "gold": "A fixed-size datum computed from an arbitrary block of digital data for the purpose of detecting accidental errors"
+  },
+  {
+   "index": 117,
+   "prediction": "standalone application, not needing installation and not modifying the host system",
+   "gold": "PeaZip Portable is available as standalone application, not needing installation"
+  },
+  {
+   "index": 118,
+   "prediction": "it is dropped",
+   "gold": "will extract it to the location (of the computer system) where it is dropped"
+  },
+  {
+   "index": 119,
+   "prediction": "disk utilities",
+   "gold": "system's disk utilities (clean, defrag, manage, remove), system management tools (control panel, computer management, task manager) and displays environment variables"
+  }
+ ]
+}
